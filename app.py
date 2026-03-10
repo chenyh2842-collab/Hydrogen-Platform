@@ -1,117 +1,112 @@
 import streamlit as st
 import mechanics
 import plotly.graph_objects as go
-from streamlit_lottie import st_lottie
-import requests
+import numpy as np
 import time
 
-# 1. 顶级视觉配置
-st.set_page_config(page_title="H2 NEXUS | GLOBAL ENERGY", layout="wide", initial_sidebar_state="collapsed")
+# 1. 顶级页面配置
+st.set_page_config(page_title="H2 NEXUS | GLOBAL TERMINAL", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. 注入“黑客帝国+未来实验室”CSS
+# 2. 注入顶级赛博朋克 CSS (含背景微光和发光文字)
 st.markdown("""
     <style>
-    /* 全局暗黑发光背景 */
     .main {
         background-color: #00050a;
-        background-image: 
-            radial-gradient(circle at 50% 50%, #001f3f 0%, #00050a 100%),
-            url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+        background-image: radial-gradient(circle at 50% 50%, #001f3f 0%, #00050a 100%);
         color: #00f2ff;
     }
-
-    /* 霓虹标题动画 */
     .hero-title {
-        font-family: 'Orbitron', sans-serif;
-        font-size: 3.5rem;
+        font-family: 'Courier New', monospace;
+        font-size: 4rem;
         font-weight: 900;
         text-align: center;
-        background: linear-gradient(to right, #00f2ff, #7000ff, #00f2ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: gradient-move 5s infinite linear;
-        text-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+        color: #00f2ff;
+        text-shadow: 0 0 20px #00f2ff, 0 0 40px #00a2ff;
+        letter-spacing: 10px;
+        margin-top: 50px;
     }
-
-    @keyframes gradient-move {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 200% 50%; }
-    }
-
-    /* 侧边栏全透明化 */
-    [data-testid="stSidebar"] {
-        background-color: rgba(0, 8, 20, 0.8) !important;
-        border-right: 1px solid #00f2ff;
-        backdrop-filter: blur(15px);
+    [data-testid="stMetric"] {
+        background: rgba(0, 242, 255, 0.05) !important;
+        border: 1px solid #00f2ff !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
     }
     </style>
     """, unsafe_allow_html=True)
 
 
-# 3. 辅助函数：加载动态 Lottie 动画 (3D 氢气/能量球)
-def load_lottieurl(url):
-    r = requests.get(url)
-    if r.status_code != 200: return None
-    return r.json()
+# 3. 手搓 3D 动态能源核心 (替代报错的 Lottie)
+def render_cyber_core():
+    # 生成 3D 粒子云
+    n = 1000
+    theta = np.random.uniform(0, 2 * np.pi, n)
+    phi = np.random.uniform(0, np.pi, n)
+    r = 10 + np.random.normal(0, 1, n)
+
+    x = r * np.sin(phi) * np.cos(theta)
+    y = r * np.sin(phi) * np.sin(theta)
+    z = r * np.cos(phi)
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=x, y=y, z=z,
+        mode='markers',
+        marker=dict(size=2, color=z, colorscale='Electric', opacity=0.8)
+    )])
+
+    fig.update_layout(
+        scene=dict(
+            xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
+            camera=dict(eye=dict(x=1.2, y=1.2, z=1.2)),
+            aspectmode='cube'
+        ),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=0, r=0, b=0, t=0),
+        showlegend=False
+    )
+    return fig
 
 
-# 这里使用一个代表“未来科技/地球能源”的 Lottie 链接
-lottie_energy = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_m6cu96ze.json")  # 3D 旋转科技球
-lottie_h2 = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_S6936A.json")  # 3D 氢分子脉动
-
-# 4. 侧边栏控制
+# 4. 侧边栏
+if 'lang' not in st.session_state: st.session_state.lang = "English"
 with st.sidebar:
-    st.markdown("## `ACCESS GRANTED`")
-    if st.button("🌐 Switch Language / 切换语言"):
-        st.session_state.lang = "中文" if st.session_state.get('lang', 'English') == 'English' else 'English'
+    st.markdown("### `SECURITY ACCESS`")
+    if st.button("🌐 SWITCH LANGUAGE"):
+        st.session_state.lang = "中文" if st.session_state.lang == "English" else "English"
+    lang = st.session_state.lang
+    page = st.radio("SELECT SECTOR", ["GLOBAL HUB", "UHS RESEARCH", "ECONOMICS"])
 
-    lang = st.session_state.get('lang', 'English')
-    st.divider()
-    page = st.selectbox("CORE OPERATIONS", ["DASHBOARD", "PRODUCTION", "UHS STORAGE", "LOGISTICS", "ECONOMICS"])
-
-# 5. 首页：极致震撼开场
-if page == "DASHBOARD":
-    # 顶部流光标题
-    st.markdown(f'<p class="hero-title">{"H2 GLOBAL NEXUS TERMINAL" if lang == "English" else "氢能全球枢纽终端"}</p>',
+# 5. 主页面逻辑
+if page == "GLOBAL HUB":
+    # 动态流光标题
+    title_text = "H2 NEXUS TERMINAL" if lang == "English" else "氢能全球枢纽终端"
+    st.markdown(f'<p class="hero-title">{title_text}</p>', unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; color: #00f2ff; opacity: 0.6;'>FUTURE ENERGY INFRASTRUCTURE v4.0</h4>",
                 unsafe_allow_html=True)
 
-    # 中央 3D 动态氢气/地球示意图 (顶级的视觉重心)
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
-        st_lottie(lottie_energy, speed=1, reverse=False, loop=True, quality="high", height=400)
+    # 渲染 3D 能源核心 (这就是你要的高大上开场动态图)
+    st.plotly_chart(render_cyber_core(), use_container_width=True, config={'displayModeBar': False})
 
-    # 底部数据矩阵
+    # 数据矩阵
     st.write("---")
     m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric("GLOBAL SYNC", "ONLINE", delta="Stable")
-    with m2:
-        st.metric("ENERGY OUTPUT", "14.2 GW", delta="+2.4%")
-    with m3:
-        st.metric("H2 PURITY", "99.998%", delta="Max")
-    with m4:
-        st.metric("RISK LEVEL", "0.02%", delta="-0.01%", delta_color="inverse")
+    m1.metric("NETWORK", "ENCRYPTED", "SECURE")
+    m2.metric("SYNC RATE", "99.8%", "LIVE")
+    m3.metric("CORE TEMP", "1.2 MK", "STABLE")
+    m4.metric("PURITY", "99.9999%", "MAX")
 
-    # 引入一个 3D 动态背景感官图
-
-
-# 6. 其他模块（保持高端风格）
-elif page == "UHS STORAGE":
-    st.markdown("## 🛰️ Subterranean Neural Scan")
-    l, r = st.columns([1, 1])
-    with l:
-        # 这里的 3D 模型我们也做发光处理
+elif page == "UHS RESEARCH":
+    st.title("🛡️ Subsurface Intelligence")
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        depth = st.slider("Depth Factor", 500, 3000, 1200)
+        st.info("Neural scanning formation...")
+    with col2:
+        # 这里使用之前的高级 3D 盐穴
         x, y, z = mechanics.generate_3d_cavern_mesh()
-        fig = go.Figure(data=[go.Mesh3d(x=x.flatten(), y=y.flatten(), z=z.flatten(),
-                                        intensity=z.flatten(), colorscale='Viridis', opacity=0.8)])
-        fig.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+        fig = go.Figure(data=[go.Surface(x=x, y=y, z=z, colorscale='Hot', showscale=False)])
+        fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False), template="plotly_dark",
+                          paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True)
-    with r:
-        st_lottie(lottie_h2, height=300)
-        st.write("### Real-time Formation Pressure: 12.4 MPa")
-        st.progress(62)
-        st.caption("Monitoring hydrogen molecular diffusion in salt cavern...")
 
-# 7. 底部状态栏
 st.markdown("---")
-st.caption("SYSTEM STATUS: [OPERATIONAL] | CORE: QUANTUM-H2 | ENCRYPTION: ACTIVE")
+st.caption(f"© 2026 FUTURE ENERGY LAB | ACCESS ID: {time.time()}")
