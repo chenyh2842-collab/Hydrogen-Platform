@@ -3,102 +3,133 @@ import mechanics
 import plotly.graph_objects as go
 import numpy as np
 
-# 1. 初始化配置
-st.set_page_config(page_title="H2 NEXUS | GLOBAL", layout="wide", initial_sidebar_state="collapsed")
+st.markdown("""
+    <video autoplay loop muted playsinline style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1; opacity: 0.2;">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-screen-with-blue-lights-22262-large.mp4" type="video/mp4">
+    </video>
+""", unsafe_allow_html=True)
 
-# 2. 注入顶级赛博 UI (全息投影风格)
+# 1. 顶级视觉配置
+st.set_page_config(page_title="H2 NEBULA | COMMAND", layout="wide", initial_sidebar_state="expanded")
+
+# 2. 注入“星际座舱”CSS (这一段是视觉核心)
 st.markdown("""
     <style>
+    /* 全局深空背景 */
     .main {
-        background: radial-gradient(circle at center, #001529 0%, #000408 100%);
+        background: #000408;
         color: #00f2ff;
+        background-image: 
+            radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 50% 50%, #001f3f, #000408);
+        background-size: 200px 200px, 150px 150px, 100% 100%;
     }
-    .hero-title {
+
+    /* 顶部流光 Banner */
+    .hero-banner {
+        height: 300px;
+        background: linear-gradient(45deg, #001529, #003366);
+        border: 2px solid #00f2ff;
+        border-radius: 15px;
+        box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* 全息文字效果 */
+    .hologram-text {
         font-family: 'Courier New', Courier, monospace;
-        font-size: 3.5rem;
-        font-weight: 900;
-        text-align: center;
-        letter-spacing: 12px;
-        color: #00f2ff;
-        text-shadow: 0 0 15px #00f2ff, 0 0 30px #0055ff;
-        margin-top: 30px;
+        font-size: 3rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 15px;
+        color: rgba(0, 242, 255, 0.8);
+        text-shadow: 
+            0 0 10px #00f2ff,
+            0 0 20px #00f2ff,
+            -2px 0 #ff00de,
+            2px 0 #00ff00;
+        animation: glitch 1s infinite;
     }
-    [data-testid="stMetric"] {
+
+    @keyframes glitch {
+        0% { transform: skew(0deg); }
+        20% { transform: skew(2deg); }
+        60% { transform: skew(-1deg); }
+        100% { transform: skew(0deg); }
+    }
+
+    /* 模块卡片 - 玻璃拟态 2.0 */
+    .stMetric {
         background: rgba(0, 242, 255, 0.05) !important;
-        border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        border-radius: 15px !important;
+        border: 1px solid rgba(0, 242, 255, 0.4) !important;
         backdrop-filter: blur(10px);
+        box-shadow: inset 0 0 20px rgba(0, 242, 255, 0.1);
     }
     </style>
     """, unsafe_allow_html=True)
 
+# 3. 页面布局：震撼开场
+st.markdown("""
+    <div class="hero-banner">
+        <div class="hologram-text">H2 NEXUS</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# 3. 稳健的 3D 粒子地球函数 (修复了 ValueError)
-def render_hologram_earth():
-    # 使用极坐标采样生成地球点云
-    n = 2000
-    phi = np.random.uniform(0, 2 * np.pi, n)
-    theta = np.random.uniform(0, np.pi, n)
-    x = 10 * np.sin(theta) * np.cos(phi)
-    y = 10 * np.sin(theta) * np.sin(phi)
-    z = 10 * np.cos(theta)
-
-    fig = go.Figure(data=[go.Scatter3d(
-        x=x, y=y, z=z,
-        mode='markers',
-        marker=dict(size=1.5, color=z, colorscale='Blues', opacity=0.5)
-    )])
-
-    fig.update_layout(
-        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
-                   camera=dict(eye=dict(x=1.3, y=1.3, z=0.7))),
-        paper_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=0, r=0, b=0, t=0),
-        showlegend=False
-    )
-    return fig
-
-
-# 4. 侧边栏及语言
-if 'lang' not in st.session_state: st.session_state.lang = "English"
+# 4. 侧边栏控制
 with st.sidebar:
-    st.markdown("### `COMMAND CONTROL`")
-    if st.button("🌐 SWITCH LANGUAGE"):
-        st.session_state.lang = "中文" if st.session_state.lang == "English" else "English"
-    lang = st.session_state.lang
-    page = st.radio("SECTOR", ["GLOBAL NEXUS", "UHS STUDY", "FINANCE"])
+    st.title("🛡️ COMMAND CENTER")
+    lang = st.radio("INTERFACE LANG", ["ENG", "CHN"])
+    st.markdown("---")
+    st.write("### SYSTEM LOGS")
+    st.code(">> INITIALIZING QUANTUM LINK\n>> SCANNING UHS CAVERN\n>> SYNCING DATA NODES...", language="bash")
+    st.divider()
+    page = st.selectbox("MODULE", ["CORE OVERVIEW", "MIDSTREAM UHS", "FINANCIAL MATRIX"])
 
-# 5. 板块逻辑
-if page == "GLOBAL NEXUS":
-    st.markdown(f'<p class="hero-title">{"H2 NEXUS COMMAND" if lang == "English" else "氢能全球枢纽终端"}</p>',
-                unsafe_allow_html=True)
+# 5. 内容分流
+if page == "CORE OVERVIEW":
+    st.write("### 💠 REAL-TIME ENERGY PULSE")
 
-    # 震撼的地球开场
-    st.plotly_chart(render_hologram_earth(), use_container_width=True, config={'displayModeBar': False})
+    # 震撼的数据面板
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("NETWORK STATUS", "ENCRYPTED", "STABLE")
+    m2.metric("ENERGY SYNC", "94.2%", "UP")
+    m3.metric("CORE TEMP", "1200 K", "OPTIMAL")
+    m4.metric("SYSTEM VIBE", "ELITE", "MAX")
 
+    # 3D 视觉展示 (改进版)
     st.write("---")
-    cols = st.columns(4)
-    cols[0].metric("SYNC STATUS", "ACTIVE", "GLOBAL")
-    cols[1].metric("STORAGE", "1.2M T", "+0.4%")
-    cols[2].metric("CORE TEMP", "STABLE", "65°C")
-    cols[3].metric("NETWORK", "ENCRYPTED", "SECURE")
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.subheader("Hydrogen Flow Simulation")
+        # 建立一个带有流光效果的折线图
+        chart_data = np.random.randn(20, 3)
+        st.line_chart(chart_data)
 
-
-elif page == "UHS STUDY":
-    st.header("🛡️ Subsurface Intelligence Scan")
-    l, r = st.columns([1, 2])
-    with l:
-        depth = st.slider("Depth", 500, 3000, 1200)
-        p, t, d = mechanics.get_uhs_physics(depth)
-        st.metric("Pressure", f"{p} MPa")
-        st.metric("Density", f"{d} kg/m³")
-    with r:
-        # 调用梨形盐穴
-        X, Y, Z = mechanics.generate_3d_cavern_mesh()
-        fig = go.Figure(data=[go.Surface(x=X, y=Y, z=Z, colorscale='Electric', showscale=False)])
-        fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False),
+    with c2:
+        st.subheader("Global Storage Nodes")
+        # 粒子球增强
+        n = 500
+        fig = go.Figure(data=[go.Scatter3d(
+            x=np.random.standard_normal(n), y=np.random.standard_normal(n), z=np.random.standard_normal(n),
+            mode='markers', marker=dict(size=3, color='cyan', opacity=0.6)
+        )])
+        fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
                           paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, b=0, t=0))
         st.plotly_chart(fig, use_container_width=True)
 
+elif page == "MIDSTREAM UHS":
+    st.header("🛡️ Subsurface Intelligence")
+    # 这里嵌入你最自豪的 3D 梨形盐穴
+    x, y, z = mechanics.generate_3d_cavern_mesh()
+    fig = go.Figure(data=[go.Surface(x=x, y=y, z=z, colorscale='Electric', showscale=False)])
+    fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_title='DEPTH'),
+                      template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig, use_container_width=True)
+
 st.markdown("---")
-st.caption(f"© 2026 FUTURE ENERGY LAB | {lang} VERSION ACTIVE")
+st.caption("© 2026 FUTURE ENERGY LAB | ACCESS ID: CNPC-ULTRA-SECURE")
