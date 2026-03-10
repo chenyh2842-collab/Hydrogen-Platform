@@ -2,134 +2,165 @@ import streamlit as st
 import mechanics
 import plotly.graph_objects as go
 import numpy as np
+import time
 
-st.markdown("""
-    <video autoplay loop muted playsinline style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1; opacity: 0.2;">
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-screen-with-blue-lights-22262-large.mp4" type="video/mp4">
-    </video>
-""", unsafe_allow_html=True)
+# 1. 初始化顶级视觉配置 (Interstellar Command Center)
+st.set_page_config(page_title="H2 GLOBAL NEXUS | NX-500", layout="wide", initial_sidebar_state="collapsed")
 
-# 1. 顶级视觉配置
-st.set_page_config(page_title="H2 NEBULA | COMMAND", layout="wide", initial_sidebar_state="expanded")
-
-# 2. 注入“星际座舱”CSS (这一段是视觉核心)
+# 2. 注入极致赛博视觉 CSS (核心：全息、霓虹、故障、呼吸感)
 st.markdown("""
     <style>
-    /* 全局深空背景 */
+    /* 全局：深空赛博蓝背景 + 动态扫描线纹理 */
     .main {
-        background: #000408;
-        color: #00f2ff;
+        background: #000206;
         background-image: 
-            radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 50% 50%, #001f3f, #000408);
-        background-size: 200px 200px, 150px 150px, 100% 100%;
+            radial-gradient(circle at center, #001529 0%, #000206 100%),
+            linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+        background-size: 100% 100%, 100% 3px;
+        color: #e6f7ff;
     }
 
-    /* 顶部流光 Banner */
-    .hero-banner {
-        height: 300px;
-        background: linear-gradient(45deg, #001529, #003366);
-        border: 2px solid #00f2ff;
-        border-radius: 15px;
-        box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        position: relative;
-    }
-
-    /* 全息文字效果 */
-    .hologram-text {
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 3rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 15px;
-        color: rgba(0, 242, 255, 0.8);
+    /* 顶部 Glitch 故障艺术大标题 */
+    .hero-title {
+        font-family: 'Segoe UI Light', 'Courier New', monospace;
+        font-size: 3.8rem;
+        font-weight: 900;
+        text-align: center;
+        letter-spacing: 20px;
+        color: rgba(0, 242, 255, 0.9);
         text-shadow: 
-            0 0 10px #00f2ff,
-            0 0 20px #00f2ff,
-            -2px 0 #ff00de,
-            2px 0 #00ff00;
-        animation: glitch 1s infinite;
+            0 0 15px #00f2ff, 
+            0 0 30px #00a2ff,
+            -3px 0 #ff00de, 
+            3px 0 #00ff00;
+        margin-top: 40px;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        animation: glitch 1s infinite linear;
     }
-
     @keyframes glitch {
         0% { transform: skew(0deg); }
-        20% { transform: skew(2deg); }
-        60% { transform: skew(-1deg); }
+        20% { transform: skew(1.5deg); }
+        60% { transform: skew(-0.8deg); }
         100% { transform: skew(0deg); }
     }
 
-    /* 模块卡片 - 玻璃拟态 2.0 */
-    .stMetric {
-        background: rgba(0, 242, 255, 0.05) !important;
-        border: 1px solid rgba(0, 242, 255, 0.4) !important;
-        backdrop-filter: blur(10px);
-        box-shadow: inset 0 0 20px rgba(0, 242, 255, 0.1);
+    /* 玻璃拟态卡片 3.0：呼吸边框 + 全息模糊 */
+    [data-testid="stMetric"] {
+        background: rgba(0, 242, 255, 0.03) !important;
+        border: 1px solid rgba(0, 242, 255, 0.25) !important;
+        backdrop-filter: blur(15px);
+        border-radius: 18px !important;
+        box-shadow: 0 0 25px rgba(0, 242, 255, 0.1);
+        transition: 0.4s;
+    }
+    [data-testid="stMetric"]:hover {
+        transform: translateY(-8px);
+        border: 1px solid #00f2ff !important;
+        box-shadow: 0 0 50px rgba(0, 242, 255, 0.4);
+    }
+
+    /* 系统控制面板全透明 */
+    [data-testid="stSidebar"] {
+        background-color: rgba(0, 5, 15, 0.95) !important;
+        border-right: 1px solid rgba(0, 242, 255, 0.4);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. 页面布局：震撼开场
-st.markdown("""
-    <div class="hero-banner">
-        <div class="hologram-text">H2 NEXUS</div>
-    </div>
-    """, unsafe_allow_html=True)
 
-# 4. 侧边栏控制
+# 3. 辅助函数：渲染全球能源地图 (Holographic World Map)
+def render_holographic_map():
+    # 使用地理坐标数据 (Plotly 自带)
+    df = pd.DataFrame({'lat': [], 'lon': [], 'name': []})  # 占位
+
+    # 建立 3D 地理散射图 (使用地球模型)
+    fig = go.Figure()
+
+    # 地球网格
+    # (使用 mechanics.py 中的粒子球逻辑模拟全球网络感)
+    n = 2000
+    phi = np.random.uniform(0, 2 * np.pi, n)
+    theta = np.random.uniform(0, np.pi, n)
+    r = 10
+    x = r * np.sin(theta) * np.cos(phi)
+    y = r * np.sin(theta) * np.sin(phi)
+    z = r * np.cos(theta)
+
+    fig.add_trace(go.Scatter3d(
+        x=x, y=y, z=z, mode='markers',
+        marker=dict(size=1.2, color=z, colorscale='Cyan', opacity=0.3)
+    ))
+
+    # 全球各大洲霓虹轮廓 (电影质感核心)
+    # (这里需要复杂的地理数据，我们用 Scatter3d 模拟主要节点)
+    cities = pd.DataFrame({
+        'name': ['Beijing', 'New York', 'London', 'Tokyo', 'Singapore'],
+        'lat': [39.9, 40.7, 51.5, 35.7, 1.3],
+        'lon': [116.4, -74.0, -0.1, 139.7, 103.8]
+    })
+
+    # 经纬度转 3D
+    cities['z'] = 10 * np.sin(np.radians(cities['lat']))
+    cities['y'] = 10 * np.cos(np.radians(cities['lat'])) * np.sin(np.radians(cities['lon']))
+    cities['x'] = 10 * np.cos(np.radians(cities['lat'])) * np.cos(np.radians(cities['lon']))
+
+    # 添加主要节点发光点和连接线
+    fig.add_trace(go.Scatter3d(
+        x=cities['x'], y=cities['y'], z=cities['z'],
+        mode='markers+lines',
+        marker=dict(size=8, color='#ff00de', opacity=0.8),
+        line=dict(color='#00f2ff', width=3)
+    ))
+
+    fig.update_layout(
+        scene=dict(
+            xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
+            camera=dict(eye=dict(x=1.4, y=1.4, z=0.5)),
+            aspectmode='cube'
+        ),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=0, r=0, b=0, t=0),
+        showlegend=False
+    )
+    return fig
+
+
+# 4. 侧边栏：系统控制中心 (默认英文)
+if 'lang' not in st.session_state: st.session_state.lang = "English"
 with st.sidebar:
-    st.title("🛡️ COMMAND CENTER")
-    lang = st.radio("INTERFACE LANG", ["ENG", "CHN"])
-    st.markdown("---")
-    st.write("### SYSTEM LOGS")
-    st.code(">> INITIALIZING QUANTUM LINK\n>> SCANNING UHS CAVERN\n>> SYNCING DATA NODES...", language="bash")
+    st.markdown("### `SYSTEM ACCESS`")
+    if st.button("🌐 SWITCH LANGUAGE"):
+        st.session_state.lang = "中文" if st.session_state.lang == "English" else "English"
+
+    curr_lang = st.session_state.lang
     st.divider()
-    page = st.selectbox("MODULE", ["CORE OVERVIEW", "MIDSTREAM UHS", "FINANCIAL MATRIX"])
+    page = st.selectbox("OPERATIONAL SECTOR", ["GLOBAL NEXUS", "UHS RESEARCH", "ECONOMICS"])
+    st.divider()
+    # 系统日志瀑布流
+    st.code(">> INITIALIZING QUANTUM LINK\n>> SCANNING GEO-STORAGE\n>> ID: CNPC-ULTRA-2050", language="bash")
+    st.caption("NEURAL-NET STATUS: ONLINE")
 
-# 5. 内容分流
-if page == "CORE OVERVIEW":
-    st.write("### 💠 REAL-TIME ENERGY PULSE")
+# 5. 主页面模块
+# Glitch 大标题
+title_text = "H2 NEBULA GLOBAL COMMAND" if curr_lang == "English" else "氢能全球指挥终端"
+st.markdown(f'<p class="hero-title">{title_text}</p>', unsafe_allow_html=True)
+st.caption(
+    f"<p style='text-align: center; color: #00f2ff; opacity: 0.6;'>System Status: [Operational] | NX-Series v5.0</p>",
+    unsafe_allow_html=True)
 
-    # 震撼的数据面板
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("NETWORK STATUS", "ENCRYPTED", "STABLE")
-    m2.metric("ENERGY SYNC", "94.2%", "UP")
-    m3.metric("CORE TEMP", "1200 K", "OPTIMAL")
-    m4.metric("SYSTEM VIBE", "ELITE", "MAX")
+if page == "GLOBAL NEXUS":
+    # 中央：全息旋转地球地图 (视觉重心)
+    st.plotly_chart(render_holographic_map(), use_container_width=True, config={'displayModeBar': False})
 
-    # 3D 视觉展示 (改进版)
     st.write("---")
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        st.subheader("Hydrogen Flow Simulation")
-        # 建立一个带有流光效果的折线图
-        chart_data = np.random.randn(20, 3)
-        st.line_chart(chart_data)
-
-    with c2:
-        st.subheader("Global Storage Nodes")
-        # 粒子球增强
-        n = 500
-        fig = go.Figure(data=[go.Scatter3d(
-            x=np.random.standard_normal(n), y=np.random.standard_normal(n), z=np.random.standard_normal(n),
-            mode='markers', marker=dict(size=3, color='cyan', opacity=0.6)
-        )])
-        fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
-                          paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, b=0, t=0))
-        st.plotly_chart(fig, use_container_width=True)
-
-elif page == "MIDSTREAM UHS":
-    st.header("🛡️ Subsurface Intelligence")
-    # 这里嵌入你最自豪的 3D 梨形盐穴
-    x, y, z = mechanics.generate_3d_cavern_mesh()
-    fig = go.Figure(data=[go.Surface(x=x, y=y, z=z, colorscale='Electric', showscale=False)])
-    fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_title='DEPTH'),
-                      template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)')
-    st.plotly_chart(fig, use_container_width=True)
+    # 底部数据矩阵 (玻璃拟态半透明)
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("NETWORK STATUS", "ENCRYPTED", "OPTIMAL")
+    m2.metric("ENERGY SYNC", "94.8%", "+3.1%")
+    m3.metric("CORE TEMP", "1.2 MK", "Stable")
+    m4.metric("CARBON OFFSET", "125k Tons", "Live")
 
 st.markdown("---")
-st.caption("© 2026 FUTURE ENERGY LAB | ACCESS ID: CNPC-ULTRA-SECURE")
+st.caption(f"© 2026 FUTURE ENERGY LAB | ACCESS ID: CNPC-ULTRA-SECURE")
