@@ -3,132 +3,131 @@ import mechanics
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import time
 
-# 1. 顶级页面配置
-st.set_page_config(page_title="H2 NEBULA | COMMAND v6.0", layout="wide", initial_sidebar_state="collapsed")
+# 1. 顶级配置
+st.set_page_config(page_title="H2 NEBULA COMMAND", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. 注入极致赛博 UI (全息投影风格)
+# 2. 核心视觉：注入红外扫描与数字翻滚 CSS
 st.markdown("""
     <style>
-    .main {
-        background: radial-gradient(circle at center, #001529 0%, #000206 100%);
-        color: #e6f7ff;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+
+    .main { background: radial-gradient(circle at center, #001529 0%, #000206 100%); color: #e6f7ff; }
+
+    /* 霓虹大标题 */
     .hero-title {
-        font-family: 'Courier New', monospace;
-        font-size: 3.5rem;
-        font-weight: 900;
-        text-align: center;
-        letter-spacing: 15px;
-        color: #00f2ff;
-        text-shadow: 0 0 15px #00f2ff, 0 0 30px #0055ff, -2px 0 #ff00de, 2px 0 #00ff00;
-        margin-top: 20px;
-        animation: glitch 1.5s infinite linear;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 3.5rem; text-align: center; letter-spacing: 15px;
+        color: #00f2ff; text-shadow: 0 0 20px #00f2ff;
+        animation: glitch 2s infinite;
     }
-    @keyframes glitch {
-        0% { transform: skew(0deg); }
-        20% { transform: skew(1deg); }
-        60% { transform: skew(-0.5deg); }
-        100% { transform: skew(0deg); }
+
+    /* 动态数字翻滚效果 */
+    .rolling-number {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.8rem; font-weight: 900;
+        color: #ff00de; text-shadow: 0 0 15px #ff00de;
+        animation: slideUp 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 全息卡片 */
     [data-testid="stMetric"], .stPlotlyChart {
-        background: rgba(0, 242, 255, 0.05) !important;
+        background: rgba(0, 242, 255, 0.04) !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        backdrop-filter: blur(15px);
-        border-radius: 15px !important;
-        padding: 10px;
+        backdrop-filter: blur(10px); border-radius: 15px !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. 稳健的 3D 全球能源地图
-def render_cyber_world_map():
+
+# 3. 动态扫描渲染引擎
+def render_scanned_map():
     locations = pd.DataFrame({
-        'City': ['Beijing', 'Houston', 'London', 'Dubai', 'Singapore', 'Berlin'],
-        'lat': [39.9, 29.7, 51.5, 25.2, 1.3, 52.5],
-        'lon': [116.4, -95.3, -0.1, 55.3, 103.8, 13.4]
+        'City': ['Beijing', 'Houston', 'London', 'Dubai', 'Singapore'],
+        'lat': [39.9, 29.7, 51.5, 25.2, 1.3], 'lon': [116.4, -95.3, -0.1, 55.3, 103.8]
     })
     fig = go.Figure()
-    # 添加能源节点
+    # 呼吸感的脉动点
+    pulse_size = 12 + 4 * np.sin(time.time() * 2)
     fig.add_trace(go.Scattergeo(
-        lon = locations['lon'], lat = locations['lat'],
-        mode = 'markers+lines',
-        marker = dict(size = 10, color = '#ff00de', line=dict(width=2, color='#00f2ff')),
-        line = dict(width = 1, color = 'rgba(0, 242, 255, 0.2)')
+        lon=locations['lon'], lat=locations['lat'],
+        mode='markers',
+        marker=dict(size=pulse_size, color='#00f2ff', opacity=0.7,
+                    line=dict(width=2, color='#ffffff'))
     ))
-    fig.update_geos(
-        projection_type="orthographic",
-        showcoastlines=True, coastlinecolor="rgba(0, 242, 255, 0.3)",
-        showland=True, landcolor="#000811",
-        bgcolor='rgba(0,0,0,0)'
-    )
-    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, b=0, t=0), showlegend=False)
+    fig.update_geos(projection_type="orthographic", showland=True, landcolor="#000811",
+                    showocean=True, oceancolor="#000206", bgcolor='rgba(0,0,0,0)')
+    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, b=0, t=0))
     return fig
 
-# 4. 主界面逻辑
-if 'lang' not in st.session_state: st.session_state.lang = "English"
-lang = st.session_state.lang
 
-# 侧边栏
-with st.sidebar:
-    st.title("🛡️ COMMAND")
-    if st.button("🌐 SWITCH LANGUAGE"):
-        st.session_state.lang = "中文" if lang == "English" else "English"
-        st.rerun() # 修正：使用 st.rerun() 替代旧版
-    st.code(">> SYSTEM ONLINE\n>> NODES SYNCED", language="bash")
+def render_infrared_cavern():
+    X, Y, Z = mechanics.generate_3d_cavern_mesh()
+    # 基础全息网格
+    fig = go.Figure(data=[go.Surface(x=X, y=Y, z=Z, colorscale='Blues', opacity=0.4, showscale=False)])
 
-# 标题区
-title_text = "H2 GLOBAL COMMAND" if lang == "English" else "氢能全球指挥终端"
-st.markdown(f'<p class="hero-title">{title_text}</p>', unsafe_allow_html=True)
+    # 动态红外扫描线 (随时间循环移动)
+    scan_z = -60 + 60 * np.sin(time.time() * 1.5)
+    # 抽取对应高度的截面圆
+    fig.add_trace(go.Scatter3d(
+        x=X[20], y=Y[20], z=[scan_z] * len(X[20]),
+        mode='lines', line=dict(color='#ff00de', width=8)
+    ))
 
-# 布局：大屏大矩阵
+    fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
+                      paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, b=0, t=0))
+    return fig
+
+
+# 4. 主界面布局
+st.markdown('<p class="hero-title">H2 GLOBAL COMMAND</p>', unsafe_allow_html=True)
+
 st.write("---")
+c1, c2, c3 = st.columns([1, 2, 1])
 
-# 第一行：全球视野 + 核心监控
-c_left, c_mid, c_right = st.columns([1, 2, 1])
-
-with c_left:
-    st.markdown("### 💠 Network")
-    st.metric("SYNC STATUS", "ACTIVE", "GLOBAL")
+with c1:
+    st.markdown("### 💠 Infrastructure")
+    st.metric("SYNC STATUS", "ACTIVE", "SECURE")
     st.metric("CORE TEMP", "1.2 MK", "STABLE")
 
-with c_mid:
-    # 核心 3D 地球
-    st.plotly_chart(render_cyber_world_map(), use_container_width=True, config={'displayModeBar': False})
+with c2:
+    st.plotly_chart(render_scanned_map(), use_container_width=True)
+
+with c3:
+    st.markdown("### ⚡ Pulse")
+    st.metric("GLOBAL OUTPUT", "14.2 GW", "+2.4%")
+    st.metric("NETWORK ID", "NX-2050", "ELITE")
+
+st.write("---")
+c_left, c_right = st.columns([1.5, 1])
+
+with c_left:
+    st.markdown("#### 🛡️ Subsurface Infrared Scanning")
+    col_a, col_b = st.columns([1, 2])
+    with col_a:
+        d_val = st.slider("Scanning Depth (m)", 500, 3000, 1500)
+        p, t, dens = mechanics.get_uhs_physics(d_val)
+        st.write(f"Pressure: `{p} MPa`")
+        st.write(f"Temp: `{t} °C`")
+    with col_b:
+        # 这里就是那个带红外扫描线的 3D 盐穴
+        st.plotly_chart(render_infrared_cavern(), use_container_width=True)
 
 with c_right:
-    st.markdown("### ⚡ Pulse")
-    st.metric("H2 SUPPLY", "2.4M TONS", "+5.2%")
-    st.metric("NODES", "154 ACTIVE", "LIVE")
-
-# 第二行：机理模拟 (填充空位)
-st.write("---")
-c_up, c_mid_sub, c_econ = st.columns(3)
-
-with c_up:
-    st.markdown("#### 🧪 Production")
-    pw = st.slider("Power (MW)", 1, 100, 25)
-    eff, flow = mechanics.simulate_electrolysis(pw, 65) # 适配 mechanics 接口
-    st.metric("Efficiency", f"{eff}%")
-    st.write(f"Flow Rate: `{flow} kg/h`")
-
-with c_mid_sub:
-    st.markdown("#### 🛡️ Storage Scan")
-    depth = st.slider("Depth (m)", 500, 3000, 1200)
-    p, t, d = mechanics.get_uhs_physics(depth)
-    st.write(f"Pressure: `{p} MPa` | Density: `{d} kg/m³`")
-    # 迷你 3D 盐穴
-    X, Y, Z = mechanics.generate_3d_cavern_mesh()
-    fig_c = go.Figure(data=[go.Surface(x=X, y=Y, z=Z, colorscale='Electric', showscale=False)])
-    fig_c.update_layout(height=200, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='rgba(0,0,0,0)', scene=dict(xaxis_visible=False, yaxis_visible=False))
-    st.plotly_chart(fig_c, use_container_width=True)
-
-with c_econ:
-    st.markdown("#### 💰 Strategic")
-    capex, savings = mechanics.get_financial_metrics(10000, 1200)
-    st.metric("CAPEX", f"${capex}M")
+    st.markdown("#### 💰 Financial Feasibility")
+    cap, sav = mechanics.get_financial_metrics(10000, d_val)
+    # 数字翻滚动画展示
+    st.markdown(f'<div class="rolling-number">${cap}M</div>', unsafe_allow_html=True)
+    st.caption("ESTIMATED TOTAL CAPEX (CAPITAL EXPENDITURE)")
     st.progress(85)
-    st.caption("Feasibility: HIGH")
+    st.info(">> ROI ANALYSIS: HIGH FEASIBILITY")
 
 st.markdown("---")
-st.caption("© 2026 FUTURE ENERGY LAB | ACCESS ID: CNPC-ULTRA-SECURE")
+if st.button("🔄 REFRESH COMMAND SENSORS"):
+    st.rerun()
